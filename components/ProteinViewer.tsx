@@ -96,11 +96,16 @@ export default function ProteinViewer({ geneName }: { geneName: string }) {
 
     (async () => {
       try {
-        await import("3dmol");
+        const mod = (await import("3dmol")) as unknown as {
+          default?: Mol3DGlobal;
+        } & Mol3DGlobal;
         if (cancelled) return;
 
-        const $3Dmol = (window as unknown as { $3Dmol?: Mol3DGlobal }).$3Dmol;
-        if (!$3Dmol) throw new Error("3Dmol failed to attach to window.");
+        const $3Dmol: Mol3DGlobal | undefined =
+          mod.default ??
+          (typeof mod.createViewer === "function" ? mod : undefined) ??
+          (window as unknown as { $3Dmol?: Mol3DGlobal }).$3Dmol;
+        if (!$3Dmol) throw new Error("3Dmol module did not expose createViewer.");
 
         target.innerHTML = "";
         viewer = $3Dmol.createViewer(target, {
