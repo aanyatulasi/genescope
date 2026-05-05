@@ -18,6 +18,14 @@ type GeneAnalysis = {
 
 const EXAMPLE_GENES = ["BRCA1", "TP53", "CFTR", "HBB", "APOE", "FMR1"];
 
+type TabId = "dashboard" | "protein" | "crispr";
+
+const TABS: { id: TabId; label: string; short: string }[] = [
+  { id: "dashboard", label: "Dashboard", short: "Dashboard" },
+  { id: "protein", label: "Protein Structure Explorer", short: "Protein" },
+  { id: "crispr", label: "CRISPR Simulation", short: "CRISPR" },
+];
+
 type CatalogGene = { symbol: string; note: string };
 type CatalogCategory = { category: string; genes: CatalogGene[] };
 
@@ -119,6 +127,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GeneAnalysis | null>(null);
   const [browseOpen, setBrowseOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
 
   async function analyze(target: string) {
     const trimmed = target.trim();
@@ -289,8 +298,14 @@ export default function HomePage() {
 
       {result && (
         <>
-          <Results data={result} />
-          <ProteinViewer geneName={result.geneName} />
+          <TabBar activeTab={activeTab} onChange={setActiveTab} />
+          {activeTab === "dashboard" && <Results data={result} />}
+          {activeTab === "protein" && (
+            <ProteinViewer geneName={result.geneName} />
+          )}
+          {activeTab === "crispr" && (
+            <CrisprPlaceholder geneName={result.geneName} />
+          )}
         </>
       )}
 
@@ -402,6 +417,63 @@ function Results({ data }: { data: GeneAnalysis }) {
       <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 text-sm leading-relaxed text-amber-900">
         <strong className="font-semibold">Educational note:</strong>{" "}
         {data.educationalDisclaimer}
+      </div>
+    </section>
+  );
+}
+
+function TabBar({
+  activeTab,
+  onChange,
+}: {
+  activeTab: TabId;
+  onChange: (id: TabId) => void;
+}) {
+  return (
+    <div className="glass-card mx-auto w-full bg-card-gradient p-1.5">
+      <div className="flex gap-1 sm:gap-2" role="tablist" aria-label="Sections">
+        {TABS.map((tab) => {
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={active}
+              type="button"
+              onClick={() => onChange(tab.id)}
+              className={`flex-1 rounded-xl px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition sm:text-sm ${
+                active
+                  ? "bg-gradient-to-r from-helix-600 to-bio-teal text-white shadow-glow"
+                  : "text-slate-600 hover:bg-helix-50"
+              }`}
+            >
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.short}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CrisprPlaceholder({ geneName }: { geneName: string }) {
+  return (
+    <section className="glass-card overflow-hidden bg-card-gradient p-6 md:p-8">
+      <span className="section-title">CRISPR simulation</span>
+      <h3 className="mt-1 bg-gradient-to-r from-helix-700 to-bio-teal bg-clip-text pb-1 text-2xl font-bold leading-[1.15] text-transparent md:text-3xl">
+        Coming soon for {geneName}
+      </h3>
+      <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+        Interactive CRISPR editing simulation will live here. You&apos;ll be
+        able to find PAM sites, design a guide RNA, simulate knockouts,
+        insertions, or substitutions, and see how the protein changes — all for
+        the gene you&apos;ve selected.
+      </p>
+      <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm leading-relaxed text-amber-900">
+        <strong className="font-semibold">Educational simulation only.</strong>{" "}
+        This will not perform real genetic analysis and should not be used for
+        medical decisions.
       </div>
     </section>
   );
