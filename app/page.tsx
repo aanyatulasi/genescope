@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import CrisprSimulator from "@/components/CrisprSimulator";
 import ProteinViewer from "@/components/ProteinViewer";
 
 type GeneAnalysis = {
@@ -304,7 +305,7 @@ export default function HomePage() {
             <ProteinViewer geneName={result.geneName} />
           )}
           {activeTab === "crispr" && (
-            <CrisprPlaceholder geneName={result.geneName} />
+            <CrisprSimulator geneName={result.geneName} />
           )}
         </>
       )}
@@ -454,28 +455,6 @@ function TabBar({
         })}
       </div>
     </div>
-  );
-}
-
-function CrisprPlaceholder({ geneName }: { geneName: string }) {
-  return (
-    <section className="glass-card overflow-hidden bg-card-gradient p-6 md:p-8">
-      <span className="section-title">CRISPR simulation</span>
-      <h3 className="mt-1 bg-gradient-to-r from-helix-700 to-bio-teal bg-clip-text pb-1 text-2xl font-bold leading-[1.15] text-transparent md:text-3xl">
-        Coming soon for {geneName}
-      </h3>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
-        Interactive CRISPR editing simulation will live here. You&apos;ll be
-        able to find PAM sites, design a guide RNA, simulate knockouts,
-        insertions, or substitutions, and see how the protein changes — all for
-        the gene you&apos;ve selected.
-      </p>
-      <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm leading-relaxed text-amber-900">
-        <strong className="font-semibold">Educational simulation only.</strong>{" "}
-        This will not perform real genetic analysis and should not be used for
-        medical decisions.
-      </div>
-    </section>
   );
 }
 
